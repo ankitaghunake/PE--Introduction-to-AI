@@ -1,53 +1,30 @@
 import heapq
 
-def best_first_search(graph, start, goal, heuristic):
+def best_first_search(graph, heuristics, start, goal):
     visited = set()
-    pq = []  # priority queue: (heuristic, node)
-    heapq.heappush(pq, (heuristic[start], start))
+    pq = []
+    heapq.heappush(pq, (heuristics[start], start, [start]))
 
     while pq:
-        h, current = heapq.heappop(pq)
-        if current in visited:
-            continue
-        visited.add(current)
-        print(current, end=" ")
+        (cost, node, path) = heapq.heappop(pq)
+        if node == goal:
+            return path
 
-        if current == goal:
-            print("\nGoal reached!")
-            return
+        visited.add(node)
+        for neighbour in graph[node]:
+            if neighbour not in visited:
+                heapq.heappush(pq, (heuristics[neighbour], neighbour, path + [neighbour]))
 
-        for neighbor in graph.get(current, []):
-            if neighbor not in visited:
-                heapq.heappush(pq, (heuristic[neighbor], neighbor))
+    return None
 
-# User input for graph
-n = int(input("Enter number of vertices: "))
-graph = {}
+graph = {
+    'A': ['B', 'C'],
+    'B': ['D', 'E'],
+    'C': ['F'],
+    'D': [],
+    'E': ['F'],
+    'F': []
+}
 
-print("Enter node names:")
-nodes = [input(f"Node {i+1}: ") for i in range(n)]
-
-e = int(input("Enter number of edges: "))
-print("Enter edges (u v):")
-for _ in range(e):
-    u, v = input().split()
-    if u not in graph:
-        graph[u] = []
-    if v not in graph:
-        graph[v] = []
-    graph[u].append(v)
-    graph[v].append(u)  # undirected
-
-# User input for heuristic values
-heuristic = {}
-print("Enter heuristic values for each node (estimated cost to goal):")
-for node in nodes:
-    h = int(input(f"h({node}) = "))
-    heuristic[node] = h
-
-# Start and goal nodes
-start_node = input("Enter start node: ")
-goal_node = input("Enter goal node: ")
-
-print("\nBest-First Search traversal:")
-best_first_search(graph, start_node, goal_node, heuristic)
+heuristics = {'A': 6, 'B': 4, 'C': 2, 'D': 7, 'E': 3, 'F': 0}
+print("Best First Search Path:", best_first_search(graph, heuristics, 'A', 'F'))
